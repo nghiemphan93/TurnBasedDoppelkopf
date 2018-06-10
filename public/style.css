@@ -1,0 +1,16 @@
+
+
+#output{
+  height: 300px;
+  border: #daedf0 2px solid;
+  border-radius: 4px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 0.7rem;
+}
+
+#typing{
+  display: flex;
+  flex-direction: column-reverse;
+}
