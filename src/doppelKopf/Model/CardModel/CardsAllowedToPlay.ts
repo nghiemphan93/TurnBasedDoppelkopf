@@ -14,7 +14,7 @@ export class CardsAllowedToPlay extends Cards{
 
       for(let i = 0; i<this.cards.length; i++){
          let card: Card = this.cards[i];
-         result += `${card} `;
+         result += `${i}_${card} `;
       }
 
       return result;

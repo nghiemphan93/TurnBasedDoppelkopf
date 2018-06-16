@@ -19,3 +19,7 @@
  *      insertGamePlayed():         Insert a all information of the game played by one player to database
  *                                  including: hadKreuzQueen, pointsWonInGame, wonOrNot, player_ID, partnerInGame_ID, game_ID
  */
+
+export class CRUD{
+
+}

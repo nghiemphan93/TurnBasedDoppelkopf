@@ -78,14 +78,13 @@ export class Player {
     * Play a random card, used for DEMO
     * @return
     */
-   public playARandomCard(): number | Card | null {
-      let card: number | Card | null = null;
+   public playARandomCard(): Card{
+      let card: Card;
 
       // if there's still at least 1 Card in CardsAllowedToPlay
-      if (this.cardsAllowedToPlay.numCards >= 0) {
-         card = this.cardsAllowedToPlay.remove(Math.random() * this.cardsAllowedToPlay.numCards);
-         this.cardsOnHand.remove(card);
-      }
+      card = this.cardsAllowedToPlay.remove(Math.floor(Math.random() * this.cardsAllowedToPlay.numCards));
+      this.cardsOnHand.remove(card);
+
 
       return card;
    }
@@ -109,7 +108,7 @@ export class Player {
             // if it's the same FEHL color, then add to CardsToPlay
             // set hasSameFehl = true
             // FEHL's STRENGTH has the same first Letter: 1 or 2 or 3
-            if (card.strength.charAt(0) == firstCardPlayed.strength.charAt(0)) {
+            if (card.strength.charAt(0) === firstCardPlayed.strength.charAt(0)) {
                cardsToPlayReturn.push(card);
                hasSameFehl = true;
             }

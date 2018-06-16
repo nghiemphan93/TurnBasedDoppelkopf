@@ -59,7 +59,7 @@ export abstract class Cards {
     * @param {number | Card} indexOrCard
     * @returns {Card | null}
     */
-   public remove(indexOrCard: number | Card | null): Card | null{
+   public remove(indexOrCard: number | Card): Card{
       if(typeof (indexOrCard) == "number"){
          let index = indexOrCard;
          let temp: Card = this.cards[index];
@@ -68,14 +68,10 @@ export abstract class Cards {
          return temp;
       }else{
          let index: number = this.cards.indexOf(<Card>indexOrCard);
-         if(index >= 0){
-            this.cards.splice(index, 1);
-            this.numCards--;
+         this.cards.splice(index, 1);
+         this.numCards--;
 
-            return indexOrCard;
-         }else{
-            return null;
-         }
+         return indexOrCard;
       }
    }  // end of remove
 
@@ -84,7 +80,7 @@ export abstract class Cards {
     * Clear all the cards from the card list
     */
    public clear(): void {
-      this.cards.splice(0, this.numCards-1);
+      this.cards.splice(0, this.numCards);
       this.numCards = 0;
    }
 
