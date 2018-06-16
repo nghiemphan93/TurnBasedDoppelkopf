@@ -1,3 +1,9 @@
+# Test Test Test
+* Clone the Project
+* Install nodemon globally
+* Run nodemon  => the file src/doppelKopf/Test.ts will be called 
+
+
 # Content
 * Run the server
 * Open 4 browser tabs with the route http://localhost:3000/form

@@ -1,3 +1,18 @@
+/**
+ * Base Card Collection for CardsOnHand, CardsPlayedPerRound, CardsToDeal, CardsWon, CardsAllowedToPlay
+ *
+ * Attribute:
+ *     cards:           List storing all cards depending on purpose (deck, hand, Stich, cards won...)
+ *     numCards:        Number of cards at particular moment
+ *     players:         Keep references to Players
+ *
+ * Important Methods:
+ *     add, addAll, remove, clear:  Manipulate elements in the collection
+ *     filterFehl():                Filter all the FEHL in the card list
+ *     filterTrumpf():              Filter all the TRUMPF in the card list
+ *     display():                   Print out all Cards to ConsoleView
+ */
+
 import {Card} from "./Card";
 import {Player} from "../PlayerModel/Player";
 
@@ -127,7 +142,7 @@ export abstract class Cards {
 
 
 
-   
+
 
    //region Getter Setter
    get cards(): Card[] {
@@ -146,7 +161,7 @@ export abstract class Cards {
       this._numCards = value;
    }
 
-   get players(): Player[] {
+   get players(): Player[]{
       return this._players;
    }
 

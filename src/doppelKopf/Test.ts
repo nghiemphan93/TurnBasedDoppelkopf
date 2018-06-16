@@ -2,17 +2,24 @@ import {Card} from "./Model/CardModel/Card";
 import {Suit} from "./Model/CardModel/Suit";
 import {Rank} from "./Model/CardModel/Rank";
 import {type} from "os";
+import {CardsToDeal} from "./Model/CardModel/CardsToDeal";
+import {PlayersSetupFactory} from "./Controller/PlayersSetupFactory";
+import {CardsSetupFactory} from "./Controller/CardsSetupFactory";
 
 
-let card: Card = new Card(Suit.HERZ, Rank.ASS);
-
-console.log(card);
-
-console.log(card.rank);
+// TEST TEST TEST
 
 
-let array: Array<number> = [5,6,4,8];
+let cardsToDeal: CardsToDeal = new CardsToDeal([]);
+cardsToDeal.init();
 
-for(let temp of array){
-   console.log(temp);
-}
+
+let playersSetupFactory: PlayersSetupFactory = new PlayersSetupFactory();
+let cardsSetupFactory: CardsSetupFactory = new CardsSetupFactory(playersSetupFactory);
+
+cardsSetupFactory.initCardSetup();
+
+console.log(cardsSetupFactory.playerSetup.players[0].cardsOnHand.cards.toString());
+
+let card: Card = new Card(Suit.HERZ, Rank.DAMEN);
+console.log(card.toString());

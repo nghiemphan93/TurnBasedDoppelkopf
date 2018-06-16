@@ -1,3 +1,13 @@
+/**
+ *     Hand of each player
+ *
+ *     Attribute:
+ *         fehl:       List holding all FEHL
+ *         strumpf:    List holding all STRUMPF
+ *
+ *     Important Methods:
+ */
+
 import {Cards} from "./Cards";
 import {Card} from "./Card";
 

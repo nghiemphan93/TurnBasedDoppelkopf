@@ -1,3 +1,32 @@
+/**
+ * Class for each player who takes part in the game
+ *
+ * Attribute:
+ *      name:                   name
+ *      password:               password
+ *      cardsOnHand:            cards on hand
+ *      cardsWon:               cards were collected
+ *      cardsPlayedPerRound:    cards played on table each round
+ *      cardsAllowedToPlay      cards allowed to play(bedienen)
+ *      pointsWonPerGame        all points of each game
+ *      hasKreuzQueen :         if the player has the Kreuz Queen or not, used to determine
+ *      specialPoints:          special points won by Bazinga
+ *      allowedToGuessBazinga:  true/false representing allowed to guess Bazinga or not
+ *      gameWon:                won the game or not
+ *      partner:                who was the partner in the game
+ *
+ *  Important methods:
+ *      playACard():            Play a chosen card
+ *      playARandomCard():      Play a random card, used for DEMO
+ *      setWhatCardToPlay():    Check and determine what cards on Hand are allowed to play, depending on the first card was played
+ *      calcPointsWonPerGame(): Calculation of points won per game
+ *      guessBazinga():         Attempt to guess Bazinga
+ *                              Allowed to guess only once per Game
+ *                              if correct, receives 10 Special Points
+ *                              if not, loses 5 Points
+ *
+ */
+
 import {CardsOnHand} from "../CardModel/CardsOnHand";
 import {CardsWon} from "../CardModel/CardsWon";
 import {CardsPlayedPerRound} from "../CardModel/CardsPlayedPerRound";

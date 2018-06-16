@@ -1,3 +1,9 @@
+/**
+ * Store the list of allowed to play cards
+ *  which were checked in setWhatCardToPlay() in Class Player
+ *
+ */
+
 import {Cards} from "./Cards";
 import {Card} from "./Card";
 

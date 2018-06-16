@@ -1,3 +1,17 @@
+/**
+ *     Help interface for sorting all cards classes
+ *
+ *     Attribute:
+ *
+ *     Important Methods:
+ *         sortBySuit():    Sort the card list by SUIT
+ *         sortByRank():    Sort the card list by RANK
+ *         sortByFehl():    Sort the card list by FEHL
+ *         sortByTrumpf():  Sort the card list by TRUMPF
+ *         sortByStrength():Sort the card list by STRENGTH
+ *         sortByPoint():   Sort the card list by POINT
+ */
+
 import {Cards} from "./Cards";
 
 export class SortHelper {

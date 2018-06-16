@@ -1,3 +1,76 @@
+/**
+ * The single Card to play in game
+ *
+ *     Attribute:
+ *         Suit            = PIK | KARO | HERZ | KREUZ
+ *         Rank            = ZEHN | BUBE | DAME | KOENIG | ASS
+ *         POINT           = 10   |   2  |  3   |  4    |  11
+ *         STRENGTH        see below, determined by setStrength()
+ *         FEHL or TRUMPF  is determined in setFehlAndTrumpf()
+ *         belongsToPlayer from what player does the card come
+ *         isFehl          is Fehl
+ *         isTrumpf        is Trumpf
+ *
+ *     Important Methods:
+ *         setFehlAndTrumpf():              set status FEHL | TRUMPF for each card
+ *         setStrength():                   determine the strength of each card compared to others
+ *         setPoint():                      Check and set Point according to Rank
+ *         suitToUnicode():                 Return UNICODE Symbol for SUIT
+ *         rankToUnicode():                 Return UNICODE Symbol for RANK
+ *         getName():                       Name of the card including Suit and Rank
+ *
+ *      These are the cards sorted by strength
+ *      Each card has a 2-letter code representing the strength for example: "5A"
+ *      The first letter is the group order:
+ *                                  1 2 3 4 5 6 7
+ *                                  123 are FEHL
+ *                                  4567 are TRUMPF
+ *      The second letter is the order in group:
+ *                                  A B C D
+ *                                  A < B < C < D
+ *
+ *                     ♥10 TRUMPF 7 strong 10 points
+ *                     ♥10 TRUMPF 7 strong 10 points
+ *                     ♣Q TRUMPF 6D strong 3 points
+ *                     ♣Q TRUMPF 6D strong 3 points
+ *                     ♠Q TRUMPF 6C strong 3 points
+ *                     ♠Q TRUMPF 6C strong 3 points
+ *                     ♥Q TRUMPF 6B strong 3 points
+ *                     ♥Q TRUMPF 6B strong 3 points
+ *                     ♦Q TRUMPF 6A strong 3 points
+ *                     ♦Q TRUMPF 6A strong 3 points
+ *                     ♣J TRUMPF 5D strong 2 points
+ *                     ♣J TRUMPF 5D strong 2 points
+ *                     ♠J TRUMPF 5C strong 2 points
+ *                     ♠J TRUMPF 5C strong 2 points
+ *                     ♥J TRUMPF 5B strong 2 points
+ *                     ♥J TRUMPF 5B strong 2 points
+ *                     ♦J TRUMPF 5A strong 2 points
+ *                     ♦J TRUMPF 5A strong 2 points
+ *                     ♦A TRUMPF 4C strong 11 points
+ *                     ♦A TRUMPF 4C strong 11 points
+ *                     ♦10 TRUMPF 4B strong 10 points
+ *                     ♦10 TRUMPF 4B strong 10 points
+ *                     ♦K TRUMPF 4A strong 4 points
+ *                     ♦K TRUMPF 4A strong 4 points
+ *                     ♥A FEHL 3C strong 11 points
+ *                     ♥A FEHL 3C strong 11 points
+ *                     ♥K FEHL 3A strong 4 points
+ *                     ♥K FEHL 3A strong 4 points
+ *                     ♠A FEHL 2C strong 11 points
+ *                     ♠A FEHL 2C strong 11 points
+ *                     ♠10 FEHL 2B strong 10 points
+ *                     ♠10 FEHL 2B strong 10 points
+ *                     ♠K FEHL 2A strong 4 points
+ *                     ♠K FEHL 2A strong 4 points
+ *                     ♣A FEHL 1C strong 11 points
+ *                     ♣A FEHL 1C strong 11 points
+ *                     ♣10 FEHL 1B strong 10 points
+ *                     ♣10 FEHL 1B strong 10 points
+ *                     ♣K FEHL 1A strong 4 points
+ *                     ♣K FEHL 1A strong 4 points
+ */
+
 import {Suit} from "./Suit";
 import {Rank} from "./Rank";
 import {Player} from "../PlayerModel/Player";
@@ -18,6 +91,9 @@ export class Card {
    constructor(suit: Suit, rank: Rank) {
       this._suit = suit;
       this._rank = rank;
+      this.setFehlAndTrumpf();
+      this.setPoint();
+      this.setStrength();
    }
 
    //endregion
@@ -207,7 +283,7 @@ export class Card {
       return this.suit + " " + this.rank;
    }
 
-   public toString(): string {
+   public toString = (): string => {
       return this.suitToUnicode() + this.rankToUnicode();
    }
 
