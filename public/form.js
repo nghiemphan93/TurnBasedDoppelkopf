@@ -7,7 +7,7 @@ let btnNextTurn = document.getElementById("btnNextTurn");
 let name = document.getElementById("name");
 
 // ================================
-// setup events to server
+// Setup events to server
 // ================================
 // send register data to server
 if (btnRegister !== null) {
@@ -35,7 +35,7 @@ if(btnNextTurn !== null){
 
 
 // ================================
-// listen to events from Servers
+// Listen to events from Servers
 // ================================
 // login failed event
 socket.on("registerFail", (data) => {
@@ -54,6 +54,7 @@ socket.on("userList", (data) => {
 
 // get turn to play event
 socket.on("yourTurn", (data) => {
+   console.log(data.message);
    btnNextTurn.disabled = false;
 });
 
@@ -74,6 +75,7 @@ socket.on("startGame", (data) => {
 // ================================
 // register
 function register() {
+   btnRegister.disabled = true;
    socket.emit("register", {userName: name.value});
    name.disabled = true;
 }
