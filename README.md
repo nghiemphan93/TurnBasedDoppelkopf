@@ -1,15 +1,11 @@
-# Test Test Test
-* Clone the Project
-* Install nodemon globally
-* Run nodemon  => the file src/doppelKopf/Main.ts will be called 
-
-
 # Content
-* Run the server
-* Open 4 browser tabs with the route http://localhost:3000/form
-* After each tab registered with a name => "Game started" appears in console
-* Only the first player registered has access to the button "next turn"
-* Every time the button "next turn" is clicked, it will be disabled and the "next turn" button of the next player will be triggered
+* Run the server with: npm run mon
+* Open 4 browser tabs on route http://localhost:4000/form
+* After each tab registered with a name => "Game started"
+* First round only the first player registered has access to the button "play a card"
+* Enter the index of the card from "cards allowed to play" then click "play a card"
+* Every time the button "play a card" is clicked, it will be disabled and the "play a card" button of the next player will be triggered
+* After 4 rounds, the game will be over
 
 # How to compile js files and run with nodemon
 npm run mon
