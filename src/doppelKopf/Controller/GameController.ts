@@ -20,7 +20,7 @@
  *
  * Important methods:
  *      initGame()              Setup players and cards
- *      startGame()             Start a game
+ *      startGameSeeding()             Start a game
  *      resetGame()             Prepare for new game
  *      endGame()               End a game
  *      startRound()            Start a round
@@ -58,6 +58,8 @@ import {Suit} from "../Model/CardModel/Suit";
 import {Card} from "../Model/CardModel/Card";
 import {CardsPlayedPerRound} from "../Model/CardModel/CardsPlayedPerRound";
 import {ConsoleView} from "../View/ConsoleView";
+import {SocketSetup} from "../SocketSetup";
+import socket from "socket.io";
 
 export class GameController extends Doppelkopf{
    //region Attributes
@@ -74,20 +76,27 @@ export class GameController extends Doppelkopf{
    private _crud: CRUD;
    private _game_ID: number = 0;
    private _console: ConsoleView;
+   private _io: socket.Server;
+   private _socketSetup: SocketSetup;
+   private _roundEnded: boolean = false;
    //endregion
 
+   //region Constructor
+   constructor(io: socket.Server){
+      super();
+      this.io = io;
+   }
+   //endregion
 
    //region Important methods
    /**
     * Setup players and cards
     */
    public initGame(): void{
-      this.numbRound = 0;
-      this.playersSetupFactory = new PlayersSetupFactory();
       this.cardsSetupFactory = new CardsSetupFactory(this.playersSetupFactory);
+      this.numbRound = 0;
       this.teamKreuzQueen = [];
       this.teamNoKreuzQueen = [];
-      this.whoHasTwoKreuzQueen = this.calWhoHasTwoKreuzQueen();
       this.rounds = [];
       this.pointTeamKreuzQueen = 0;
       this.pointTeamNoKreuzQueen = 0;
@@ -95,6 +104,37 @@ export class GameController extends Doppelkopf{
       this.console = new ConsoleView();
       this.crud = new CRUD();
       this.game_ID = 0;
+      this.cardsSetupFactory.initCardSetup();
+
+      for(let player of this.playersSetupFactory.players){
+         console.log(player.cardsOnHand.toString());
+      }
+
+
+      //  prepare which players are allowed to guess for Bazinga
+      this.playersGuessBazinga.push(...this.playersSetupFactory.players);
+      // the last position represents no player wants to guess for Bazinga that round
+      this.playersGuessBazinga.push(null);
+
+      // set who has Kreuz Queen, who not
+      this.cardsSetupFactory.checkPlayerHasKreuzQueen();
+
+      // separate two teams
+      this.whoHasTwoKreuzQueen = this.calWhoHasTwoKreuzQueen();
+
+      // Start the game
+      setInterval(() => {
+         this.startGame();
+      }, 1000/60);
+   }
+
+   /**
+    * Prepare players
+    */
+   public preparePlayers(): void{
+      this.socketSetup = new SocketSetup(this.io, this);
+      this.playersSetupFactory = new PlayersSetupFactory(this.socketSetup, this);
+      this.playersSetupFactory.init();
    }
 
 
@@ -102,6 +142,14 @@ export class GameController extends Doppelkopf{
     * Start a game
     */
    public startGame(): void{
+
+   }
+
+
+   /**
+    * Start a game
+    */
+   public startGameSeeding(): void{
       // check to play another game or stop
       let anotherGame: boolean = true;
 
@@ -378,14 +426,14 @@ export class GameController extends Doppelkopf{
       this.pointTeamKreuzQueen = 0;
       for(let i = 0; i< this.teamKreuzQueen.length; i++){
          this.pointTeamKreuzQueen += this.teamKreuzQueen[i].pointsWonPerGame;
-         console.log(this.teamKreuzQueen[i] + " " + this.teamKreuzQueen[i].pointsWonPerGame);
+         // console.log(this.teamKreuzQueen[i] + " " + this.teamKreuzQueen[i].pointsWonPerGame);
       }
 
       // Team No Kreuz Queen
       this.pointTeamNoKreuzQueen = 0;
       for(let i = 0; i< this.teamNoKreuzQueen.length; i++){
          this.pointTeamNoKreuzQueen += this.teamNoKreuzQueen[i].pointsWonPerGame;
-         console.log(this.teamNoKreuzQueen[i] + " " + this.teamNoKreuzQueen[i].pointsWonPerGame);
+         // console.log(this.teamNoKreuzQueen[i] + " " + this.teamNoKreuzQueen[i].pointsWonPerGame);
       }
    }   // end of sumUpPointTwoTeams
 
@@ -665,6 +713,30 @@ export class GameController extends Doppelkopf{
    }
 
 
+   get io(): SocketIO.Server {
+      return this._io;
+   }
 
-   //endregion
+   set io(value: SocketIO.Server) {
+      this._io = value;
+   }
+
+   get socketSetup(): SocketSetup {
+      return this._socketSetup;
+   }
+
+   set socketSetup(value: SocketSetup) {
+      this._socketSetup = value;
+   }
+
+
+   get roundEnded(): boolean {
+      return this._roundEnded;
+   }
+
+   set roundEnded(value: boolean) {
+      this._roundEnded = value;
+   }
+
+//endregion
 }

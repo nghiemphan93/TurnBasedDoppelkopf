@@ -44,7 +44,8 @@ export class CardsSetupFactory{
  * Initialize all types of cards and deal to players
  */
 public initCardSetup(): void{
-   this.playerSetup.initSeeding();
+   // this.playerSetup.initSeeding();
+   // this.playerSetup.init();
 
    // Setup all cards needed
    this.cardsToDeal.init();

@@ -1,7 +1,7 @@
 # Test Test Test
 * Clone the Project
 * Install nodemon globally
-* Run nodemon  => the file src/doppelKopf/Test.ts will be called 
+* Run nodemon  => the file src/doppelKopf/Main.ts will be called 
 
 
 # Content

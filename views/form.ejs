@@ -4,10 +4,20 @@
     <div class="form-group">
         <label for="name">Name</label>
         <input id="name" type="text" class="form-control" name="name"
-               placeholder="name">
+               placeholder="name" autofocus>
+    </div>
+
+    <div class="form-group">
+        <label for="card">Card to play</label>
+        <input id="card" type="text" class="form-control" name="card"
+               placeholder="card index to play">
     </div>
     <button type="button" id="btnRegister" class="btn btn-primary">Register</button>
-    <button disabled type="button" id="btnNextTurn" class="btn btn-primary">Next Turn</button>
+    <button disabled type="button" id="btnPlayCard" class="btn btn-primary">Play Card</button>
+
+    <div id="output" class="output">
+        <div id="pane"></div>
+    </div>
 </div>
 
 

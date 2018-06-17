@@ -2,6 +2,6 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "ts-node ./src/doppelKopf/Test.ts"
+  "exec": "ts-node ./src/Server.ts"
 }
 
