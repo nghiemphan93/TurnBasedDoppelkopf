@@ -32,14 +32,23 @@ import {CardsWon} from "../CardModel/CardsWon";
 import {CardsPlayedPerRound} from "../CardModel/CardsPlayedPerRound";
 import {CardsAllowedToPlay} from "../CardModel/CardsAllowedToPlay";
 import {Card} from "../CardModel/Card";
+import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Game} from "../GameModel/Game";
 
+@Entity()
 export class Player {
    //region Attributes
+   @PrimaryGeneratedColumn()
+   public playerId: string;
+   @Column()
    private _name: string;
+   @Column()
    private _password: string;
+
+
+   private _cardsPlayedPerRound: CardsPlayedPerRound;
    private _cardsOnHand: CardsOnHand;
    private _cardsWon: CardsWon;
-   private _cardsPlayedPerRound: CardsPlayedPerRound;
    private _cardsAllowedToPlay: CardsAllowedToPlay;
    private _pointsWonPerGame: number = 0;
    private _hasKreuzQueen: boolean = false;

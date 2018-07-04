@@ -39,9 +39,9 @@ export class PlayersSetupFactory{
     * Prepare sign up for 4 real players
     */
    public init(): void{
-      this.io.on("connection", (clientSocket: any) => {
-         clientSocket.on("register", (data: any) => {
-            this.socketSetup.register(clientSocket, data, this);
+      this.io.on("connection",async (clientSocket: any) => {
+         clientSocket.on("register", async (data: any) => {
+            await this.socketSetup.register(clientSocket, data, this);
          });
 
          clientSocket.on("disconnect", () => {
@@ -54,10 +54,10 @@ export class PlayersSetupFactory{
     * Auto seeding 4 player for Demo purpose
     */
    public initSeeding(): void{
-      let phan: Player = new Player("Phan", "phan");
-      let melanie: Player = new Player("Melanie", "melanie");
-      let sebastian: Player = new Player("Sebastian", "sebastian");
-      let dominik: Player = new Player("Dominik", "dominik");
+      let phan: Player = new Player("phan", "");
+      let melanie: Player = new Player("mel", "");
+      let sebastian: Player = new Player("sebas", "");
+      let dominik: Player = new Player("dom", "");
 
       this.addPlayer(phan);
       this.addPlayer(melanie);

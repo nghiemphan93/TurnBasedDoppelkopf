@@ -318,7 +318,7 @@ export class GameController extends Doppelkopf{
          let card = player.playARandomCard();
          this.console.displayWhatCardHasBeenPlayed(player, card);
 
-         // save the just played card to CardsPlayed in Database
+         // save the just played card to CardsPlayed in DatabaseProvider
          // this.crud.insertCardPlayed(player, card);
 
          // add the card to CardsPlayedPerRound

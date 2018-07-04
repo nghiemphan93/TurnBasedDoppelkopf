@@ -11,23 +11,24 @@
 import {Cards} from "./Cards";
 import {Card} from "./Card";
 
-export class CardsOnHand extends Cards{
+export class CardsOnHand extends Cards {
    //region Attributes
    private _fehl: Array<Card> = this.filterFehl();
-   private _trumpf: Array<Card>  = this.filterTrumpf();
+   private _trumpf: Array<Card> = this.filterTrumpf();
    //endregion
 
    //region Methods
    public toString(): string {
       let result: string = "";
 
-      for(let i = 0; i<this.cards.length; i++){
+      for (let i = 0; i < this.cards.length; i++) {
          let card: Card = this.cards[i];
          result += `${i}${card} `;
       }
 
       return result;
    }
+
    //endregion
 
    //region Getter Setter
@@ -46,5 +47,6 @@ export class CardsOnHand extends Cards{
    set trumpf(value: Array<Card>) {
       this._trumpf = value;
    }
+
    //endregion
 }

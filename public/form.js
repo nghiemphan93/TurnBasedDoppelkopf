@@ -27,12 +27,19 @@ if (name !== null) {
    })
 }
 
+// Press enter event to play a card
+if (card !== null) {
+   card.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+         playACard();
+      }
+   })
+}
+
 // Play a card
 if(btnPlayCard !== null){
    btnPlayCard.addEventListener("click", () => {
-      socket.emit("playCard", {message: `${card.value}`});
-      card.value = "";
-      btnPlayCard.disabled = true;
+      playACard();
    });
 }
 
@@ -171,6 +178,12 @@ function register() {
    btnRegister.disabled = true;
    socket.emit("register", {userName: name.value});
    name.disabled = true;
+}
+
+function playACard(){
+   socket.emit("playCard", {message: `${card.value}`});
+   card.value = "";
+   btnPlayCard.disabled = true;
 }
 
 function addToPane(message){

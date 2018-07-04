@@ -16,6 +16,7 @@ import {Suit} from "./Suit";
 import {Rank} from "./Rank";
 import {Card} from "./Card";
 import {CardsOnHand} from "./CardsOnHand";
+import {DatabaseProvider} from "../../../DatabaseProvider";
 
 export class CardsToDeal extends Cards{
 
@@ -30,7 +31,7 @@ export class CardsToDeal extends Cards{
    /**
     * Initialize all cards needed and shuffle
     */
-   public init(): void{
+   public async init(){
       // Prepare all possible Suits and Ranks
       let suits: Array<string> = Object.keys(Suit);
       let ranks: Array<string> = Object.keys(Rank);
@@ -43,6 +44,7 @@ export class CardsToDeal extends Cards{
             cards.push(new Card(<Suit>suit, <Rank>rank));
          }
       }
+
 
       this.addAll(cards);
       this.shuffle();

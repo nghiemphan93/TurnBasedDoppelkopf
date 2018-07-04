@@ -74,23 +74,42 @@
 import {Suit} from "./Suit";
 import {Rank} from "./Rank";
 import {Player} from "../PlayerModel/Player";
+import {Column, Entity, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
 
+@Entity()
 export class Card {
    //region Attributes
+   @PrimaryGeneratedColumn()
+   public cardId: string;
+   @Column()
+   public name: string;
+   @Column()
    private _suit: Suit;         // PIK, KARO, HERZ, KREUZ
+   @Column()
    private _rank: Rank;         // ZEHN, BUBE, DAME, KOENIG, ASS
+   @Column()
+   private _strength: string = "";
+   @Column()
+   private _point: number;
+   @Column({
+      type: "tinyint",
+   })
+   private _isFehl: boolean;
+   @Column({
+      type: "tinyint",
+   })
+   private _isTrumpf: boolean;
+
+
    private _SimageURL: string;
    private _belongsToPlayer: Player;
-   private _strength: string = "";
-   private _point: number;
-   private _isFehl: boolean;
-   private _isTrumpf: boolean;
    //endregion
 
    //region Constructor
    constructor(suit: Suit, rank: Rank) {
       this._suit = suit;
       this._rank = rank;
+      this.name = this.getName();
       this.setFehlAndTrumpf();
       this.setPoint();
       this.setStrength();

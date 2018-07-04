@@ -4,36 +4,54 @@ import {Player} from "./Model/PlayerModel/Player";
 import {GameController} from "./Controller/GameController";
 import {Card} from "./Model/CardModel/Card";
 import {SortHelper} from "./Model/CardModel/SortHelper";
+import {DatabaseProvider} from "../DatabaseProvider";
+import {GamesPlayed} from "./Model/GameModel/GamesPlayed";
+import {Game} from "./Model/GameModel/Game";
+import {CardsPlayed} from "./Model/GameModel/CardsPlayed";
+import {CardsCollected} from "./Model/GameModel/CardsCollected";
 
-export class SocketSetup{
+export class SocketSetup {
    private _io: socket.Server;
    private _playerSocketIDList: string[] = [];
    private _playerNameList: string[] = [];
    private _gameController: GameController;
    private _alreadyPlayed: number = 0;
 
-   constructor(io: socket.Server, gameController: GameController){
+   constructor(io: socket.Server, gameController: GameController) {
       this._io = io;
       this.gameController = gameController;
       this.main();
    }
 
-   public main(): void{
+   public main(): void {
       this.listenSocketEvents();
    }
 
    /**
     * Listen to socket events from clients
     */
-   public listenSocketEvents(): void{
+   public listenSocketEvents(): void {
       // listen when connected
-      this._io.on("connection", (clientSocket: any) => {
+      this._io.on("connection", async (clientSocket: any) => {
          // listen when played a card
-         clientSocket.on("playCard", (data: any) => {
+         clientSocket.on("playCard", async (data: any) => {
             let playerIndex: number = this.gameController.playersSetupFactory.playerSocketIDList.indexOf(clientSocket.id);
             let card: Card = this.gameController.playersSetupFactory.players[playerIndex].cardsOnHand.cards[data.message];
             this.gameController.playersSetupFactory.players[playerIndex].cardsOnHand.remove(card);
             console.log(card.toString());
+
+            // Save the card to Database for the player
+            const connection = await DatabaseProvider.setupConnection();
+            let player = this.gameController.playersSetupFactory.players[playerIndex];
+            let playerFromDatabase = await connection.getRepository(Player).findOne(player);
+            let cardFromDatabase = await connection.getRepository(Card).findOne(card);
+
+            if (playerFromDatabase && cardFromDatabase) {
+               let cardPlayed = new CardsPlayed(playerFromDatabase, cardFromDatabase);
+               await connection.getRepository(CardsPlayed).save(cardPlayed);
+               console.log(player.toString() + " played " + cardPlayed.toString());
+            }
+
 
             // Save the card to cardsPlayedPerRound
             this.gameController.cardsSetupFactory.cardsPlayedPerRound.add(card);
@@ -57,21 +75,35 @@ export class SocketSetup{
     * @param data
     * @param {PlayersSetupFactory} playersSetupFactory
     */
-   public register(clientSocket: any, data: any, playersSetupFactory: PlayersSetupFactory){
+   public async register(clientSocket: any, data: any, playersSetupFactory: PlayersSetupFactory) {
       // Add new player to PlayerNameList and PlayerSocketIDList
       console.log(`Welcome ${data.userName}`);
       playersSetupFactory.playerSocketIDList.push(clientSocket.id);
-      playersSetupFactory.players.push(new Player(data.userName, ""));
+      let player = new Player(data.userName, "");
+
+
+      // Save the player to database
+      const connection = await DatabaseProvider.setupConnection();
+      let playerFromDatabase: Player | undefined = await connection.getRepository(Player).findOne(player);
+
+      if (playerFromDatabase == undefined) {
+         await connection.getRepository(Player).save(player);
+         playersSetupFactory.players.push(player);
+      } else {
+         playersSetupFactory.players.push(playerFromDatabase);
+      }
+
       console.log(playersSetupFactory.players.toString());
       console.log(playersSetupFactory.playerSocketIDList.toString());
       console.log();
+
 
       // Send back a message to confirm registered
       clientSocket.emit("registerSuccess", {message: "registerSuccess"});
 
 
       // Check if there's already 4 players
-      if(playersSetupFactory.players.length == 4){
+      if (playersSetupFactory.players.length == 4) {
          // Setup cards
          playersSetupFactory.gameController.initGame();
 
@@ -100,10 +132,10 @@ export class SocketSetup{
     * @param clientSocket
     * @param {PlayersSetupFactory} playersSetupFactory
     */
-   public disconnect(clientSocket: any, playersSetupFactory: PlayersSetupFactory){
+   public disconnect(clientSocket: any, playersSetupFactory: PlayersSetupFactory) {
       let index: number = playersSetupFactory.playerSocketIDList.indexOf(clientSocket.id);
 
-      if(index >= 0){
+      if (index >= 0) {
          console.log(playersSetupFactory.players[index] + " disconnected");
          playersSetupFactory.playerSocketIDList.splice(index, 1);
          playersSetupFactory.players.splice(index, 1);
@@ -120,7 +152,7 @@ export class SocketSetup{
     * @param clientSocket
     * @param {PlayersSetupFactory} this.gameController.cardsSetupFactory
     */
-   public nextTurn(clientSocket: any, data: any){
+   public nextTurn(clientSocket: any, data: any) {
       let index: number = this.gameController.playersSetupFactory.playerSocketIDList.indexOf(clientSocket.id);
       this.nextPlayer(index);
    }
@@ -129,23 +161,25 @@ export class SocketSetup{
     * Notify the next player who plays the next card
     * @param {number} index
     */
-   public nextPlayer(index: number): void{
-      if(index < this.gameController.playersSetupFactory.playerSocketIDList.length-1){
+   public async nextPlayer(index: number) {
+      // if the round is not yet finished
+      if (index < this.gameController.playersSetupFactory.playerSocketIDList.length - 1) {
          // Determine what cards next player allowed to play
-         this.gameController.playersSetupFactory.players[index+1].cardsAllowedToPlay.clear();
-         this.gameController.playersSetupFactory.players[index+1].setWhatCardToPlay(this.gameController.cardsSetupFactory.cardsPlayedPerRound.cards[0]);
+         this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay.clear();
+         this.gameController.playersSetupFactory.players[index + 1].setWhatCardToPlay(this.gameController.cardsSetupFactory.cardsPlayedPerRound.cards[0]);
 
 
-         let nextPlayerID: string = this.gameController.playersSetupFactory.playerSocketIDList[index+1];
+         let nextPlayerID: string = this.gameController.playersSetupFactory.playerSocketIDList[index + 1];
 
          // Send cards allowed to play to the next player
-         this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {message: `Cards allowed to play: ${this.gameController.playersSetupFactory.players[index+1].cardsAllowedToPlay.toString()}`});
+         this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {message: `Cards allowed to play: ${this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay.toString()}`});
 
          this.io.to(nextPlayerID).emit("yourTurn", {message: "your turn"});
-      }else{
+      } else {
          // End of the round
          console.log("Round ended");
          this.gameController.roundEnded = true;
+
 
          // Determine who wins the round
          SortHelper.sortByStrength(this.gameController.cardsSetupFactory.cardsPlayedPerRound);
@@ -159,26 +193,6 @@ export class SocketSetup{
          // Add the won cards to the players' CardsWon
          roundWinner.cardsWon.addAll(cardsPerRound);
 
-         // rearrange the order of players for next round
-         // winner of the last round begins the next round
-         for(let i = 0; i < this.gameController.playersSetupFactory.players.length; i++){
-            let player: Player = this.gameController.playersSetupFactory.players[0];
-            let playerSocketID: string = this.gameController.playersSetupFactory.playerSocketIDList[0];
-
-            if(player.toString().localeCompare(roundWinner.toString()) == 0){
-               // if the first position is the round winner, stop
-               break;
-            }else{
-               // add the first player to the end of the players list
-               this.gameController.playersSetupFactory.players.push(player);
-               this.gameController.playersSetupFactory.playerSocketIDList.push(playerSocketID);
-
-               // remove the first player from the player list
-               this.gameController.playersSetupFactory.players.splice(0,1);
-               this.gameController.playersSetupFactory.playerSocketIDList.splice(0, 1);
-            }
-         }  // end of for
-
 
          // Send results of the round
          this.io.sockets.emit("roundResults", {
@@ -190,31 +204,31 @@ export class SocketSetup{
          // clear the CardsPlayedPerRound
          this.gameController.cardsSetupFactory.cardsPlayedPerRound.clear();
 
-         for(let player of this.gameController.playersSetupFactory.players){
+         for (let player of this.gameController.playersSetupFactory.players) {
             player.cardsAllowedToPlay.clear();
          }
 
          // until round 4, check Hochzeit for the first three rounds
-         if(this.gameController.numbRound == 4 && this.gameController.whoHasTwoKreuzQueen != null){
+         if (this.gameController.numbRound == 4 && this.gameController.whoHasTwoKreuzQueen != null) {
             let dreamPartner: Player | null = this.gameController.checkHochzeit();
-            if(dreamPartner != null){
+            if (dreamPartner != null) {
                // Send Hochzeit to all players
                this.io.sockets.emit("hochzeit", {message: `Hochzeit: ${dreamPartner.toString()} plays with ${this.gameController.whoHasTwoKreuzQueen}`});
-            }else{
+            } else {
                // Send Hochzeit to all players
                this.io.sockets.emit("hochzeit", {message: `Hochzeit: ${this.gameController.whoHasTwoKreuzQueen} plays alone `});
             }
          }
 
-         // New Round, next Turn
-         if(this.gameController.numbRound == 4){
-            // finish
+         // Check if game over or not
+         if (this.gameController.numbRound == 4) {
+            // if Game Over
             this.io.sockets.emit("gameOver", {message: `Game Over`});
 
             // Send all cards each player collected
             let cardsWon: string = "";
             let pointsWon: string = "";
-            for(let player of this.gameController.playersSetupFactory.players){
+            for (let player of this.gameController.playersSetupFactory.players) {
                cardsWon += player.toString() + " collected: " + player.cardsWon.toString() + "\n";
                pointsWon += player.toString() + " achieved: " + player.calcPointsWonPerGame() + " points\n";
             }
@@ -227,9 +241,9 @@ export class SocketSetup{
             let whichTeamWins: string = "";
             whichTeamWins += `${this.gameController.teamKreuzQueen.toString()} achieved ${this.gameController.pointTeamKreuzQueen} points \n`;
             whichTeamWins += `${this.gameController.teamNoKreuzQueen.toString()} achieved ${this.gameController.pointTeamNoKreuzQueen} points \n`;
-            if(this.gameController.whichTeamWon() > 0){
+            if (this.gameController.whichTeamWon() > 0) {
                whichTeamWins += `Team Kreuz Queen wins`;
-            }else{
+            } else {
                whichTeamWins += `Team No Kreuz Queen wins`;
             }
             this.io.sockets.emit("whichTeamWins", {message: `${whichTeamWins}`});
@@ -237,11 +251,65 @@ export class SocketSetup{
             // set game won for each player
             this.gameController.setGameWonEachPlayer();
 
-            // first setPartner
+            // setPartner
             this.gameController.setPartner();
 
 
-         }else{
+            // Save cards collected to Database to all players
+            const connection = await DatabaseProvider.setupConnection();
+
+            let players: Array<Player> = this.gameController.playersSetupFactory.players;
+
+            let game: Game = new Game(players[0], players[1], players[2], players[3]);
+
+            // Save Game
+            console.log("what the hell");
+
+            await connection.getRepository(Game).save(game);
+
+            console.log("saved game");
+
+
+            players.forEach(async player => {
+               // save Game Played
+               let gamesPlayed: GamesPlayed = new GamesPlayed(player.hasKreuzQueen, player.gameWon, player.pointsWonPerGame, player, player.partner, game);
+               await connection.getRepository(GamesPlayed).save(gamesPlayed);
+
+               // save Cards Collected
+               player.cardsWon.cards.forEach(async card => {
+                  let cardFromDatabase = await connection.getRepository(Card).findOne(card);
+                  if(cardFromDatabase){
+                     let cardCollected = new CardsCollected(player, cardFromDatabase);
+                     await connection.getRepository(CardsCollected).save(cardCollected);
+                  }
+               });
+            });
+
+            console.log("cai lon gi vay");
+
+
+         } else {
+            // If game not yet over
+            // rearrange the order of players for next round
+            // winner of the last round begins the next round
+            for (let i = 0; i < this.gameController.playersSetupFactory.players.length; i++) {
+               let player: Player = this.gameController.playersSetupFactory.players[0];
+               let playerSocketID: string = this.gameController.playersSetupFactory.playerSocketIDList[0];
+
+               if (player.toString().localeCompare(roundWinner.toString()) == 0) {
+                  // if the first position is the round winner, stop
+                  break;
+               } else {
+                  // add the first player to the end of the players list
+                  this.gameController.playersSetupFactory.players.push(player);
+                  this.gameController.playersSetupFactory.playerSocketIDList.push(playerSocketID);
+
+                  // remove the first player from the player list
+                  this.gameController.playersSetupFactory.players.splice(0, 1);
+                  this.gameController.playersSetupFactory.playerSocketIDList.splice(0, 1);
+               }
+            }  // end of for
+
             // Create new round
             this.sendRoundNumber();
             this.sendCardsOnhand();
@@ -259,12 +327,12 @@ export class SocketSetup{
    /**
     * Hochzeit
     */
-   public hochzeit(): void{
+   public hochzeit(): void {
       let dreamPartner: Player | null = this.gameController.checkHochzeit();
-      if(dreamPartner != null){
+      if (dreamPartner != null) {
          // Notify all players who plays with whom
          this.io.sockets.emit("hochzeit", {message: `${dreamPartner} plays with ${this.gameController.whoHasTwoKreuzQueen}`});
-      }else{
+      } else {
          // Notify all players who plays with whom
          this.io.sockets.emit("hochzeit", {message: `${this.gameController.whoHasTwoKreuzQueen} plays alone`});
       }
@@ -273,8 +341,8 @@ export class SocketSetup{
    /**
     * Send cards on hand to each player
     */
-   public sendCardsOnhand(): void{
-      for(let i = 0; i < 4; i++){
+   public sendCardsOnhand(): void {
+      for (let i = 0; i < 4; i++) {
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[i]).emit("cardsOnHand", {message: `Cards on hand: ${this.gameController.playersSetupFactory.players[i].cardsOnHand.toString()}`});
       }
    }
@@ -283,7 +351,7 @@ export class SocketSetup{
    /**
     * Send round number
     */
-   public sendRoundNumber(){
+   public sendRoundNumber() {
       // Increase first round and send to player
       this.gameController.numbRound++;
       this.io.sockets.emit("roundNumber", {message: `Round ${this.gameController.numbRound}`});
