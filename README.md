@@ -1,4 +1,5 @@
 # Content
+* Create an account for mysql with username="student", pass="student", database="kopf2"
 * Run the server with: npm run mon
 * Open 4 browser tabs on route http://localhost:4000/form
 * After each tab registered with a name => "Game started"
