@@ -99,7 +99,7 @@ export class SocketSetup {
 
 
       // Send back a message to confirm registered
-      clientSocket.emit("registerSuccess", {message: "registerSuccess"});
+      clientSocket.emit("registerSuccess", {message: `${data.userName}`});
 
 
       // Check if there's already 4 players
@@ -174,7 +174,7 @@ export class SocketSetup {
          // Send cards allowed to play to the next player
          this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {message: `Cards allowed to play: ${this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay.toString()}`});
 
-         this.io.to(nextPlayerID).emit("yourTurn", {message: "your turn"});
+         this.io.to(nextPlayerID).emit("yourTurn", {message: 1});
       } else {
          // End of the round
          console.log("Round ended");
@@ -401,4 +401,3 @@ export class SocketSetup {
 
 //endregion
 }
-
