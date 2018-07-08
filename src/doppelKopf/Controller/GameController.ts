@@ -133,7 +133,7 @@ export class GameController extends Doppelkopf{
     */
    public preparePlayers(): void{
       this.socketSetup = new SocketSetup(this.io, this);
-      this.playersSetupFactory = new PlayersSetupFactory(this.socketSetup, this);
+      this.playersSetupFactory = new PlayersSetupFactory(this.socketSetup);
       this.playersSetupFactory.init();
    }
 

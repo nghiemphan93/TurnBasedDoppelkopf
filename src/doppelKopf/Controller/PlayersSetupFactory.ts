@@ -21,16 +21,14 @@ export class PlayersSetupFactory{
    private _playerSocketIDList: string[];
    private _io: socket.Server;
    private _socketSetup: SocketSetup;
-   private _gameController: GameController;
    //endregion
 
    //region Constructors
-   constructor(socketSetup: SocketSetup, gameController: GameController) {
+   constructor(socketSetup: SocketSetup) {
       this._players = [];
       this._playerSocketIDList = [];
       this.socketSetup = socketSetup;
       this.io = socketSetup.io;
-      this.gameController = gameController;
    }
    //endregion
 
@@ -41,11 +39,11 @@ export class PlayersSetupFactory{
    public init(): void{
       this.io.on("connection",async (clientSocket: any) => {
          clientSocket.on("register", async (data: any) => {
-            await this.socketSetup.register(clientSocket, data, this);
+            await this.socketSetup.register(clientSocket, data);
          });
 
          clientSocket.on("disconnect", () => {
-            this.socketSetup.disconnect(clientSocket, this);
+            this.socketSetup.disconnect(clientSocket);
          })
       });
    }
@@ -109,15 +107,6 @@ export class PlayersSetupFactory{
 
    set socketSetup(value: SocketSetup) {
       this._socketSetup = value;
-   }
-
-
-   get gameController(): GameController {
-      return this._gameController;
-   }
-
-   set gameController(value: GameController) {
-      this._gameController = value;
    }
 
 //endregion

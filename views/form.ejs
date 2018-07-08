@@ -40,7 +40,7 @@
         <h2 class="ui header">Registrierung</h2>
         <form class="ui fluid form">
           <div class="field">
-            <input id="name" type="text" placeholder="Nutzername">
+            <input id="name" autofocus type="text" placeholder="Nutzername">
             <div class="ui pointing label">
               Gebe bitte deinen Nutzernamen ein
             </div>
@@ -130,9 +130,7 @@
           <!-- ===========================-->
           <!-- CARDS IM SPIEL -->
           <!-- ===========================-->
-          <ul>
-            <li><img src="./images/png/card_deck.png"></li>
-          </ul>
+          <div id="cardsInRound"></div>
 
           <div class="ui clearing divider"></div>
           <button class="ui green button">Karten austeilen</button>
