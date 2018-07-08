@@ -1,19 +1,29 @@
+
+
 // connect to server socket
 var socket = io();
 
 // DOM query
-let loginFrom     = document.getElementsByClassName("login")[0];
-let btnRegister   = document.getElementById("btnRegister");
-let btnPlayCard   = document.getElementById("btnPlayCard");
-let name          = document.getElementById("name");
+let loginFrom = document.getElementsByClassName("login")[0];
+let btnRegister = document.getElementById("btnRegister");
+let btnPlayCard = document.getElementById("btnPlayCard");
+let name = document.getElementById("name");
 
-let card          = document.getElementById("card");
+let card = document.getElementById("card");
 
-let pane          = document.getElementById("pane");
+let pane = document.getElementById("pane");
 
-let userYourTurn     = document.getElementById("userYourTurn")
-let userPane      = document.getElementById("userPane");
-let myCards       = document.getElementById("myCards");
+let userYourTurn = document.getElementById("userYourTurn");
+let userPane = document.getElementById("userPane");
+let myCards = document.getElementById("myCards");
+
+let playerTitles = document.getElementsByClassName("title");
+
+// SETUP list of users, hands and cardsAllowedToPlay
+let players = [];
+let cardsOnHand = [];
+let cardsAllowedToPlay = [];
+
 
 // ================================
 // Setup events to server
@@ -44,7 +54,7 @@ if (card !== null) {
 }
 
 // Play a card
-if(btnPlayCard !== null){
+if (btnPlayCard !== null) {
    btnPlayCard.addEventListener("click", () => {
       playACard();
    });
@@ -63,23 +73,29 @@ socket.on("registerFail", (data) => {
 
 // Login successful event
 socket.on("registerSuccess", (data) => {
-   console.log(data);
-   addToUserPane(data.message);
-   addToPane("Welcome " + data.message);
-
+   addToPane("Welcome " + data.player._name.toUpperCase());
 });
 
-// Get user list event
-socket.on("userList", (data) => {
-   console.log(data);
 
-   addToPane(data.message);
+// Get player list event
+socket.on("playerList", (data) => {
+   console.log(data.players);
+
+   // Add to players list
+   players = data.players;
+
+
+   // DATA BINDING display all players at top
+   for (let i = 0; i < players.length; i++) {
+      // Display player accordingly at top
+      playerTitles[i].innerHTML = players[i]._name.toUpperCase();
+   }
 });
 
 // Get turn to play event
 socket.on("yourTurn", (data) => {
    console.log(data.message);
-//   btnPlayCard.disabled = false;
+   btnPlayCard.disabled = false;
    addToPane(data.message);
 });
 
@@ -92,7 +108,7 @@ socket.on("enableNextTurnBtn", (data) => {
 socket.on("startGameSeeding", (data) => {
    console.log(data.message);
 
-   addToPane(data.message);
+   // addToPane(data.message);
 });
 
 // Receive round results
@@ -109,24 +125,25 @@ socket.on("hochzeit", (data) => {
    addToPane(data.message);
 });
 
-// Receive cards on hand
-socket.on("cardsOnHand", (data) => {
-   console.log(data.message);
-   showMyCards(data.message);
-});
+
 
 // Receive card just played from other player and myself
 socket.on("playCard", (data) => {
    console.log(data.message);
 
+});
 
+// Receive cards on hand
+socket.on("cardsOnHand", (data) => {
+   console.log(data.cardsOnHand);
+   showMyCards(data.cardsOnHand);
 });
 
 // Receive cards allowed to play
 socket.on("cardsAllowedToPlay", (data) => {
-   console.log(data.message);
+   console.log(data.cardsAllowedToPlay);
 
-  // showMyCards(data.message);
+   // showMyCards(data.message);
 });
 
 // Receive round results
@@ -140,9 +157,10 @@ socket.on("roundResults", (data) => {
 
 // Receive round number
 socket.on("roundNumber", (data) => {
-   console.log(data.message);
+   // console.log(JSON.parse(data.game));
+   console.log(data.players);
 
-   addToPane(data.message);
+   // addToPane(data.message);
 });
 
 // Receive Game Over
@@ -174,8 +192,6 @@ socket.on("whichTeamWins", (data) => {
 });
 
 
-
-
 // ================================
 // Help methods
 // ================================
@@ -188,27 +204,28 @@ function register() {
 
 }
 
-function playACard(){
+function playACard() {
    socket.emit("playCard", {message: `${card.value}`});
-// card.value = "";
-//   btnPlayCard.disabled = true;
+   card.value = "";
+   btnPlayCard.disabled = true;
 }
 
-function addToPane(message){
-    pane.innerHTML = message;
+function addToPane(message) {
+   pane.innerHTML = message;
 }
 
-function addToUserPane(message){
-    userPane.innerHTML = message;
+function addToUserPane(message) {
+   userPane.innerHTML = message;
 }
 
-function hideUserYourTurn(){
-  userYourTurn.classList.remove("hidden");
+function hideUserYourTurn() {
+   userYourTurn.classList.remove("hidden");
 }
 
-function showUserYourTurn(){
-  userYourTurn.classList.add("hidden");
+function showUserYourTurn() {
+   userYourTurn.classList.add("hidden");
 }
-function showMyCards(message){
-  myCards.innerHTML = message;
+
+function showMyCards(message) {
+   myCards.innerHTML = message;
 }

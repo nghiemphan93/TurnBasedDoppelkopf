@@ -70,26 +70,26 @@
       margin-top: 25px;
     }
 
-    .not-supported{
-      background: #fff;
-      top: 0px;
-      left: 0px;
-      width: 100%;
-      height: 100vh;
-      z-index: 9999;
-      position: fixed;
-    }
+    /*.not-supported{*/
+      /*background: #fff;*/
+      /*top: 0px;*/
+      /*left: 0px;*/
+      /*width: 100%;*/
+      /*height: 100vh;*/
+      /*z-index: 9999;*/
+      /*position: fixed;*/
+    /*}*/
 
 
-    .not-supported .not-supported-box{
-      position: relative;
-      top: 50vh;
-      transform: translateY(-50%);
-    }
+    /*.not-supported .not-supported-box{*/
+      /*position: relative;*/
+      /*top: 50vh;*/
+      /*transform: translateY(-50%);*/
+    /*}*/
 
 
-    @media screen and (min-width: 750px){
-      .not-supported{
-        display: none;
-      }
-    }
+    /*@media screen and (min-width: 750px){*/
+      /*.not-supported{*/
+        /*display: none;*/
+      /*}*/
+    /*}*/

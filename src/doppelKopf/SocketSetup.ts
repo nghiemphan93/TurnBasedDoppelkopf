@@ -9,6 +9,7 @@ import {GamesPlayed} from "./Model/GameModel/GamesPlayed";
 import {Game} from "./Model/GameModel/Game";
 import {CardsPlayed} from "./Model/GameModel/CardsPlayed";
 import {CardsCollected} from "./Model/GameModel/CardsCollected";
+import * as CircularJSON from "circular-json";
 
 export class SocketSetup {
    private _io: socket.Server;
@@ -86,7 +87,7 @@ export class SocketSetup {
       const connection = await DatabaseProvider.setupConnection();
       let playerFromDatabase: Player | undefined = await connection.getRepository(Player).findOne(player);
 
-      if (playerFromDatabase == undefined) {
+      if (playerFromDatabase === undefined) {
          await connection.getRepository(Player).save(player);
          playersSetupFactory.players.push(player);
       } else {
@@ -98,32 +99,47 @@ export class SocketSetup {
       console.log();
 
 
-      // Send back a message to confirm registered
-      clientSocket.emit("registerSuccess", {message: `${data.userName}`});
+      // Send back a message to the client to confirm registered
+      clientSocket.emit("registerSuccess", {
+         player
+      });
+
+      // Send back a message to all clients to display players
+      this.io.sockets.emit("playerList", {
+         players: playersSetupFactory.players
+      });
 
 
       // Check if there's already 4 players
       if (playersSetupFactory.players.length == 4) {
+         // test
+         this.io.sockets.emit("roundNumber", {players: playersSetupFactory.players});
+         // test
+
          // Setup cards
-         playersSetupFactory.gameController.initGame();
+         this.gameController.initGame();
 
          // Send message start game to all players
          this.io.sockets.emit("startGameSeeding", {message: "game started ♥10"});
 
+         // test
+         // this.io.sockets.emit("roundNumber", {players: playersSetupFactory.players});
+         // test
+
          // Send round number to all players
-         this.sendRoundNumber();
+         // this.sendRoundNumber();
 
          // Send cards on hand to each player
-         this.sendCardsOnhand();
+         // this.sendCardsOnhand();
 
          // Enable next turn button for the 1. player
-         this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
-         this.io.to(playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {message: `Cards allowed to play: ${this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.toString()}`});
-         this.io.to(playersSetupFactory.playerSocketIDList[0]).emit("enableNextTurnBtn", {});
+         // this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
+         // this.io.to(playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay});
+         // this.io.to(playersSetupFactory.playerSocketIDList[0]).emit("enableNextTurnBtn", {});
 
-         console.log(this.gameController.playersSetupFactory.players.toString());
-         console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
-         console.log("Team No Kreuz Queen: " + this.gameController.teamNoKreuzQueen.toString());
+         // console.log(this.gameController.playersSetupFactory.players.toString());
+         // console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
+         // console.log("Team No Kreuz Queen: " + this.gameController.teamNoKreuzQueen.toString());
       }
    } // end of register
 
@@ -172,9 +188,9 @@ export class SocketSetup {
          let nextPlayerID: string = this.gameController.playersSetupFactory.playerSocketIDList[index + 1];
 
          // Send cards allowed to play to the next player
-         this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {message: `Cards allowed to play: ${this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay.toString()}`});
+         this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay});
 
-         this.io.to(nextPlayerID).emit("yourTurn", {message: 1});
+         this.io.to(nextPlayerID).emit("yourTurn", {message: "your turn"});
       } else {
          // End of the round
          console.log("Round ended");
@@ -343,7 +359,12 @@ export class SocketSetup {
     */
    public sendCardsOnhand(): void {
       for (let i = 0; i < 4; i++) {
-         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[i]).emit("cardsOnHand", {message: `Cards on hand: ${this.gameController.playersSetupFactory.players[i].cardsOnHand.toString()}`});
+         let cardsOnHand = this.gameController.playersSetupFactory.players[i].cardsOnHand;
+         // console.log(cardsOnHand.toString());
+         // this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[i]).emit("cardsOnHand", {cardsOnHand: `${this.gameController.playersSetupFactory.players[i].cardsOnHand}`});
+         // this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[i]).emit("cardsOnHand", {cardsOnHand: `Cards on hand: ${this.gameController.playersSetupFactory.players[i].cardsOnHand.toString()}`});
+         // console.log("cai leu gi thon");
+         // console.log(JSON.stringify(cardsOnHand));
       }
    }
 
@@ -354,7 +375,16 @@ export class SocketSetup {
    public sendRoundNumber() {
       // Increase first round and send to player
       this.gameController.numbRound++;
-      this.io.sockets.emit("roundNumber", {message: `Round ${this.gameController.numbRound}`});
+
+      let cards = this.gameController.playersSetupFactory.players[0].cardsOnHand.toString();
+
+      try{
+         // this.io.sockets.emit("roundNumber", {message: game});
+         this.io.sockets.emit("roundNumber", {cards});
+      }catch (e) {
+         console.log("clgt");
+      }
+
    }
 
 
