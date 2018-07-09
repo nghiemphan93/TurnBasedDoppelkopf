@@ -128,7 +128,7 @@ export class SocketSetup {
          this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
          let nextPlayerName = this.gameController.playersSetupFactory.players[0].name;
-         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {playerName: nextPlayerName});
+         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: this.gameController.playersSetupFactory.players[0]});
 
          console.log(this.gameController.playersSetupFactory.players.toString());
          console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
@@ -182,8 +182,8 @@ export class SocketSetup {
 
          // Send cards allowed to play to the next player
          this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay)});
-         let nextPlayerName = this.gameController.playersSetupFactory.players[index+1].name;
-         this.io.to(nextPlayerID).emit("yourTurn", {playerName: nextPlayerName});
+         let nextPlayer = this.gameController.playersSetupFactory.players[index+1];
+         this.io.to(nextPlayerID).emit("yourTurn", {player: nextPlayer});
       } else {
          // End of the round
          console.log("Round ended");
@@ -208,6 +208,7 @@ export class SocketSetup {
             winner: CircularJSON.stringify(roundWinner),
             cardWon: CircularJSON.stringify(cardsPerRound[0])
          });
+         console.log(roundWinner + " won the round with " + cardsPerRound[0]);
 
 
          // clear the CardsPlayedPerRound
@@ -365,7 +366,7 @@ export class SocketSetup {
       // Increase first round and send to player
       this.gameController.numbRound++;
 
-      this.io.sockets.emit("roundNumber", {roundNumber: `${this.gameController.numbRound}`});
+      this.io.sockets.emit("roundNumber", {roundNumber: `Round ${this.gameController.numbRound}`});
    }
 
 

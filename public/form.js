@@ -13,6 +13,7 @@ let userPane = document.getElementById("userPane");
 let myCards = document.getElementById("myCards");
 let cardsInRound = document.getElementById("cardsInRound");
 let playerTitles = document.getElementsByClassName("title");
+let playersIcon = document.getElementsByClassName("playersIcon");
 
 
 // SETUP list of users, hands and cardsAllowedToPlay
@@ -90,10 +91,13 @@ socket.on("yourTurn", (data) => {
    btnPlayCard.disabled = false;
 
    // Hollow player's name
-   console.log(data.playerName);
-   let index = players.indexOf((p) => p.name.localeCompare(data.playerName));
-   playerTitles[index].style.border = "solid 5px red";
-
+   console.log(data.player);
+   console.log(players);
+   let index = players.indexOf(data.player);
+   // playerTitles[index].style.border = "solid 5px red";
+   console.log(index);
+   console.log(playersIcon[index]);
+   playersIcon[index].classList.remove("hidden");
 });
 
 // Enable play card button event
@@ -166,7 +170,7 @@ socket.on("roundResults", (data) => {
 // Receive round number
 socket.on("roundNumber", (data) => {
 
-   addToPane(data.message);
+   addToPane(data.roundNumber);
 });
 
 // Receive Game Over
