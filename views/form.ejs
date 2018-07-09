@@ -37,16 +37,16 @@
 <div class="login">
   <div class="ui container">
     <div class="login-box">
-        <h2 class="ui header">Registrierung</h2>
+        <h2 class="ui header">Registration</h2>
         <div class="ui fluid form">
           <div class="field">
-            <input id="name" autofocus type="text" placeholder="Nutzername">
+            <input id="name" autofocus type="text" placeholder="Username">
             <div class="ui pointing label">
-              Gebe bitte deinen Nutzernamen ein
+              Please enter your username.
             </div>
           </div>
         </div>
-        <button id="btnRegister" class="fluid ui green button">Registrieren</button>
+        <button id="btnRegister" class="fluid ui green button">Join game</button>
 
     </div>
   </div>
@@ -124,45 +124,34 @@
     <div class="twelve wide column">
         <div id="pane" class="ui green message">Anna spielt.</div>
         <div class="ui segment dp-item">
-          <h2 class="ui floated header ">Karten im Spiel</h2>
+          <h2 class="ui floated header ">Cards in game</h2>
           <div class="ui clearing divider"></div>
 
           <!-- ===========================-->
           <!-- CARDS IM SPIEL -->
           <!-- ===========================-->
-          <div id="cardsInRound"></div>
+          <div id="cardsInRound">
+            <ul>
+              <li>
+                <img src="./images/png/1A.png">
+                <div class="cardMember">Dominik</div>
+              </li>
+            </ul>
+
+          </div>
 
           <div class="ui clearing divider"></div>
-          <button class="ui green button">Karten austeilen</button>
+          <button class="ui green button">Card seeding</button>
       </div>
       <div class="ui segment dp-item">
         <!-- ===========================-->
         <!-- MEINE KARTEN -->
         <!-- ===========================-->
-        <h2 class="ui floated header">Meine Karten</h2>
+        <h2 class="ui floated header">My cards</h2>
         <div class="ui clearing divider"></div>
-        <div id="myCards"></div> 
-        <!--
-        <ul>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-          <li><img src="./images/png/01_herz_ass.png"></li>
-
-        </ul>
-        -->
+        <div id="myCards"></div>
         <div class="ui clearing divider"></div>
-        <button id="btnPlayCard" disabled class="ui green button">Karte spielen</button>
+        <button id="btnPlayCard" disabled class="ui green button">Play card</button>
       </div>
     </div>
     <div class="four wide column">
@@ -187,9 +176,9 @@
         </div>
       </div>
       <div class="ui segment">
-        <button class="fluid ui green button">Neues Spiel</button>
+        <button class="fluid ui green button">New game</button>
               <div class="ui clearing divider"></div>
-          <button class="fluid ui red button">Spiel beenden</button>
+          <button class="fluid ui red button">End game</button>
         </div>
       </div>
     </div>
