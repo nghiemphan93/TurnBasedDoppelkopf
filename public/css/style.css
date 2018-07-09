@@ -4,7 +4,10 @@
     }
 
     .center-user-image {
-      text-align: center
+      display: block;
+      margin: 0px auto;
+      text-align: center;
+      width: 100px;
     }
 
     iframe {
@@ -70,9 +73,28 @@
       margin-top: 25px;
     }
 
-    img{
-        width: 80px;
+
+  .cardMember {
+    background-color: #f7f7f7;
+    padding: .5rem .5rem;
+    text-align: center;
+    border: 1px solid #d0d0d0;
+    color: #909291;
+    border-radius: 5px;
+  }
+
+   li.cardsAllowed img{
+     width: 80px;
+   }
+
+    #myCards.notYourTurn li img {
+      opacity: .4;
+      cursor: not-allowed;
     }
+
+   #yourCars li img, #cardsInRound li img{
+     width: 80px;
+   }
 
     /*.not-supported{*/
       /*background: #fff;*/
