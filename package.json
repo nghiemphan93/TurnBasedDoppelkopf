@@ -33,8 +33,10 @@
     "typescript": "^2.9.1"
   },
   "dependencies": {
+    "@types/circular-json": "^0.4.0",
     "@types/socket.io": "^1.4.34",
     "body-parser": "^1.18.3",
+    "circular-json": "^0.5.5",
     "cors": "^2.8.4",
     "ejs": "^2.6.1",
     "errorhandler": "^1.5.0",
