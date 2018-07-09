@@ -17,6 +17,7 @@ export class SocketSetup {
    private _playerNameList: string[] = [];
    private _gameController: GameController;
    private _alreadyPlayed: number = 0;
+   public newGameList: Array<string> = [];
 
    constructor(io: socket.Server, gameController: GameController) {
       this._io = io;
@@ -58,11 +59,18 @@ export class SocketSetup {
             this.gameController.cardsSetupFactory.cardsPlayedPerRound.add(card);
 
             // Notify all players
-            this.io.sockets.emit("playCard", {card: CircularJSON.stringify(cardFromDatabase)});
+            this.io.sockets.emit("playCard", {
+               card: CircularJSON.stringify(cardFromDatabase),
+               player: CircularJSON.stringify(playerFromDatabase)
+            });
 
             // Call the next player
             this.nextTurn(clientSocket, data);
 
+         });
+
+         clientSocket.on("newGame", async (data: any) => {
+            this.newGame(clientSocket);
          });
 
       });
@@ -127,8 +135,8 @@ export class SocketSetup {
          // Enable next turn button for the 1. player
          this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
-         let nextPlayerName = this.gameController.playersSetupFactory.players[0].name;
-         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: this.gameController.playersSetupFactory.players[0]});
+         let nextPlayer = this.gameController.playersSetupFactory.players[0];
+         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
 
          console.log(this.gameController.playersSetupFactory.players.toString());
          console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
@@ -183,7 +191,7 @@ export class SocketSetup {
          // Send cards allowed to play to the next player
          this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay)});
          let nextPlayer = this.gameController.playersSetupFactory.players[index+1];
-         this.io.to(nextPlayerID).emit("yourTurn", {player: nextPlayer});
+         this.io.to(nextPlayerID).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
       } else {
          // End of the round
          console.log("Round ended");
@@ -321,14 +329,19 @@ export class SocketSetup {
             }  // end of for
 
             // Create new round
-            this.sendRoundNumber();
-            this.sendCardsOnhand();
-            this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
+            setTimeout(() => {
+               this.sendRoundNumber();
+               this.sendCardsOnhand();
+               this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
 
-            let nextPlayerID: string = this.gameController.playersSetupFactory.playerSocketIDList[0];
-            let nextPlayerName = this.gameController.playersSetupFactory.players[0].name;
-            this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
-            this.io.to(nextPlayerID).emit("yourTurn", {playerName: nextPlayerName});
+               let nextPlayerID: string = this.gameController.playersSetupFactory.playerSocketIDList[0];
+               let nextPlayerName = this.gameController.playersSetupFactory.players[0].name;
+               this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
+               let nexPlayer = this.gameController.playersSetupFactory.players[0];
+               this.io.to(nextPlayerID).emit("yourTurn", {player: CircularJSON.stringify(nexPlayer)});
+            }, 5000);
+
+
          }
 
 
@@ -369,6 +382,38 @@ export class SocketSetup {
       this.io.sockets.emit("roundNumber", {roundNumber: `Round ${this.gameController.numbRound}`});
    }
 
+   /**
+    * New Game from clients
+    * @returns {SocketIO.Server}
+    */
+   public newGame(clientSocket: string): void{
+      this.newGameList.push(clientSocket);
+
+      if(this.newGameList.length == 4){
+         // new game start
+         // Setup cards
+         this.gameController.initGame();
+
+         // Send message start game to all players
+         this.io.sockets.emit("startGameSeeding", {message: "game started ♥10"});
+
+         // Send round number to all players
+         this.sendRoundNumber();
+
+         // Send cards on hand to each player
+         this.sendCardsOnhand();
+
+         // Enable next turn button for the 1. player
+         this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay.addAll(this.gameController.playersSetupFactory.players[0].cardsOnHand.cards);
+         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
+         let nextPlayer = this.gameController.playersSetupFactory.players[0];
+         this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
+
+         console.log(this.gameController.playersSetupFactory.players.toString());
+         console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
+         console.log("Team No Kreuz Queen: " + this.gameController.teamNoKreuzQueen.toString());
+      }
+   }
 
    //region Getter Setter
    get io(): SocketIO.Server {
