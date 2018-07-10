@@ -61,7 +61,7 @@
       <div class="column">
         <div class="center-user-image">
           <div class="ui small image">
-          <div class="ui yellow ribbon label">
+          <div class="ui yellow ribbon label hidden winner">
             <i class="chess king icon"></i> Winner
           </div>
           <a class="ui green right corner label hidden playersIcon">
@@ -70,15 +70,15 @@
           <img src="https://semantic-ui.com/images/wireframe/image.png">
           </div>
           <div class="userItem">
-            <div class="title">Domink</div>
-            <div class="ui yellow horizontal label">20%</div>
+            <div class="title"></div>
+            <div class="ui yellow horizontal label wonAverage"></div>
           </div>
         </div>
       </div>
       <div class="column">
         <div class="center-user-image">
           <div class="ui small image">
-          <div class="ui black ribbon label hidden">
+          <div class="ui black ribbon label hidden winner">
             <i class="chess king icon"></i> Winner
           </div>
           <a class="ui green right corner label hidden playersIcon">
@@ -87,15 +87,15 @@
           <img src="https://semantic-ui.com/images/wireframe/image.png">
           </div>
           <div class="userItem">
-            <div class="title">Domink</div>
-            <div class="ui yellow horizontal label">20%</div>
+            <div class="title"></div>
+            <div class="ui yellow horizontal label wonAverage"></div>
           </div>
         </div>
       </div>
       <div class="column">
         <div class="center-user-image">
           <div class="ui small image">
-          <div class="ui black ribbon label hidden">
+          <div class="ui black ribbon label hidden winner">
             <i class="chess king icon"></i> Winner
           </div>
           <a class="ui green right corner label hidden playersIcon">
@@ -104,8 +104,8 @@
           <img src="https://semantic-ui.com/images/wireframe/image.png">
           </div>
         <div class="userItem">
-          <div class="title">Domink</div>
-          <div class="ui yellow horizontal label">20%</div>
+          <div class="title"></div>
+          <div class="ui yellow horizontal label wonAverage"></div>
         </div>
 
         </div>
@@ -113,7 +113,7 @@
       <div class="column">
         <div class="center-user-image">
           <div class="ui small image">
-          <div class="ui black ribbon label hidden">
+          <div class="ui black ribbon label hidden winner">
             <i class="chess king icon"></i> Winner
           </div>
           <a id="userYourTurn" class="ui green right corner label hidden playersIcon">
@@ -122,8 +122,8 @@
           <img src="https://semantic-ui.com/images/wireframe/image.png">
           </div>
           <div class="userItem">
-            <div class="title">Domink</div>
-            <div class="ui yellow horizontal label">20%</div>
+            <div class="title"></div>
+            <div class="ui yellow horizontal label wonAverage"></div>
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@
     <div class="twelve wide column">
         <div id="pane" class="ui green message">Anna spielt.</div>
         <div class="ui segment dp-item">
-          <h2 class="ui floated header ">Cards in game</h2>
+          <h2 class="ui floated header ">Cards in round</h2>
           <div class="ui clearing divider"></div>
 
           <!-- ===========================-->
@@ -145,20 +145,19 @@
           <!-- ===========================-->
           <div id="cardsInRound">
 
-              <li>
-                <img src="./images/png/1A.png">
-                <div class="cardMember">Dominik</div>
-              </li>
-              <li>
-                <img src="./images/png/1A.png">
-                <div class="cardMember">Dominik</div>
-              </li>
+              <!--<li>-->
+                <!--<img src="./images/png/1A.png">-->
+                <!--<div class="cardMember">Dominik</div>-->
+              <!--</li>-->
+              <!--<li>-->
+                <!--<img src="./images/png/1A.png">-->
+                <!--<div class="cardMember">Dominik</div>-->
+              <!--</li>-->
 
 
           </div>
 
           <div class="ui clearing divider"></div>
-          <button class="ui green button">Card seeding</button>
       </div>
       <div class="ui segment dp-item">
         <!-- ===========================-->
@@ -168,35 +167,38 @@
         <div class="ui clearing divider"></div>
         <div id="myCards"></div>
         <div class="ui clearing divider"></div>
-        <button id="btnPlayCard" disabled class="ui green button">Play card</button>
       </div>
     </div>
+
+    <!-- ===========================-->
+    <!-- ASIDE RIGHT-->
+    <!-- ===========================-->
     <div class="four wide column">
       <div id="userPane" class="ui grey inverted segment">
 
       </div>
       <div class="ui segments">
         <div class="ui segment">
-          <p>Top</p>
+          <div class="titleAside"></div>
+          <span class="points">0 points</span>
         </div>
         <div class="ui segment">
-          <p>Middle</p>
+          <div class="titleAside"></div>
+          <span class="points">0 points</span>
         </div>
         <div class="ui segment">
-          <p>Middle</p>
+          <div class="titleAside"></div>
+          <span class="points">0 points</span>
         </div>
         <div class="ui segment">
-          <p>Middle</p>
-        </div>
-        <div class="ui segment">
-          <p>Bottom</p>
+          <div class="titleAside"></div>
+          <span class="points">0 points</span>
         </div>
       </div>
       <div class="ui segment">
 
-        <button class="fluid ui green button" id="btnNeuesSpiel">New game</button>
+        <button class="fluid ui green button" disabled id="btnNeuesSpiel">New game</button>
               <div class="ui clearing divider"></div>
-          <button class="fluid ui red button">End game</button>
         </div>
       </div>
     </div>

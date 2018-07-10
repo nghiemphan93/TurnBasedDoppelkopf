@@ -14,6 +14,7 @@ import {SocketSetup} from "../doppelKopf/SocketSetup";
 import {GameController} from "../doppelKopf/Controller/GameController";
 import {Game} from "../doppelKopf/Model/GameModel/Game";
 import {GamesPlayed} from "../doppelKopf/Model/GameModel/GamesPlayed";
+import {createQueryBuilder} from "typeorm";
 
 class Routes {
    public router = express.Router();
@@ -55,13 +56,14 @@ class Routes {
          res.send(cardsToDeal.cards.toString());
       });
 
-      // test ajax
+      // API AJAX
       this.router.get("/game", async (req: Request, res: Response) => {
          const connection = await DatabaseProvider.setupConnection();
 
-         let gamesPlayed = await connection.getRepository(GamesPlayed).find();
-
-         console.log(CircularJSON.stringify(gamesPlayed));
+         let gamesPlayed = await connection.getRepository(GamesPlayed).find({
+            relations : ["player", "partnerInGame", "game"],
+            where: {playerId: 1}
+         });
 
          res.send(CircularJSON.stringify(gamesPlayed));
       });

@@ -32,8 +32,9 @@ import {CardsWon} from "../CardModel/CardsWon";
 import {CardsPlayedPerRound} from "../CardModel/CardsPlayedPerRound";
 import {CardsAllowedToPlay} from "../CardModel/CardsAllowedToPlay";
 import {Card} from "../CardModel/Card";
-import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import {Game} from "../GameModel/Game";
+import {GamesPlayed} from "../GameModel/GamesPlayed";
 
 @Entity()
 export class Player {

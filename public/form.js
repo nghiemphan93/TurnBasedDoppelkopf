@@ -1,23 +1,22 @@
-
-
 // connect to server socket
 var socket = io();
 
 // DOM query
-let loginFrom = document.getElementsByClassName("login")[0];
-let btnRegister = document.getElementById("btnRegister");
-let btnPlayCard = document.getElementById("btnPlayCard");
-let name = document.getElementById("name");
-let card = document.getElementById("card");
-let pane = document.getElementById("pane");
-let userYourTurn = document.getElementById("userYourTurn");
-let userPane = document.getElementById("userPane");
-let myCards = document.getElementById("myCards");
-let cardsInRound = document.getElementById("cardsInRound");
-let playerTitles = document.getElementsByClassName("title");
-let playersIcon = document.getElementsByClassName("playersIcon");
+let loginFrom     = document.getElementsByClassName("login")[0];
+let btnRegister   = document.getElementById("btnRegister");
+let name          = document.getElementById("name");
+let card          = document.getElementById("card");
+let pane          = document.getElementById("pane");
+let userPane      = document.getElementById("userPane");
+let myCards       = document.getElementById("myCards");
+let cardsInRound  = document.getElementById("cardsInRound");
+let playerTitles  = document.getElementsByClassName("title");
+let playersIcon   = document.getElementsByClassName("playersIcon");
 let btnNeuesSpiel = document.getElementById("btnNeuesSpiel");
-
+let wonAverage    = document.getElementsByClassName("wonAverage");
+let winner        = document.getElementsByClassName("winner");
+let titleAside    = document.getElementsByClassName("titleAside");
+let points        = document.getElementsByClassName("points");
 
 // SETUP list of users, hands and cardsAllowedToPlay
 let player;
@@ -25,6 +24,7 @@ let players = [];
 let cardsOnHand = [];
 let cardsPlayedInRound = [];
 let cardsAllowedToPlay = [];
+let playersInRound = [];
 
 
 // ================================
@@ -47,7 +47,7 @@ if (name !== null) {
 }
 
 // Press Neues Spiel to play new game
-if(btnNeuesSpiel !== null){
+if (btnNeuesSpiel !== null) {
    btnNeuesSpiel.addEventListener("click", () => {
       newGame();
    });
@@ -65,61 +65,93 @@ socket.on("registerFail", (data) => {
 
 // Login successful event
 socket.on("registerSuccess", (data) => {
-   player = data.player;
+   player = CircularJSON.parse(data.player);
 
-   addToPane("Welcome " + data.player._name.toUpperCase());
+   // Display userName at the right
+   userPane.innerHTML = player._name.toUpperCase();
+
+   addToPane("Welcome " + player._name.toUpperCase());
 });
 
 
 // Get player list event
 socket.on("playerList", (data) => {
-   console.log(data.players);
 
    // Add to players list
    players = data.players;
 
-
-   displayPlayers(players);
+   displayPlayers();
 });
 
 // Get turn to play event
 socket.on("yourTurn", (data) => {
-   // Mark aktuell player
-   let player = CircularJSON.parse(data.player);
-   let index = -1;
 
-   for(let i = 0; i <players.length; i++){
-      if(player._name === players[i]._name){
-         index = i;
-      }
-   }
-   console.log(index);
-   console.log(playersIcon[index]);
-   playersIcon[index].classList.remove("hidden");
 });
 
 // Enable play card button event
-socket.on("enableNextTurnBtn", (data) => {
-   btnPlayCard.disabled = false;
+socket.on("notifyNextTurn", (data) => {
+   // Mark aktuell player
+   let player = CircularJSON.parse(data.player);
+
+   for (let i = 0; i < players.length; i++) {
+      if (player._name === players[i]._name) {
+         playersIcon[i].classList.remove("hidden");
+      }else{
+         playersIcon[i].classList.add("hidden");
+      }
+   }
+
+
 });
 
 // Start game when 4 players registered event
 socket.on("startGameSeeding", (data) => {
    console.log(data.message);
 
-   // addToPane(data.message);
+   // Clear everything
+   cardsOnHand = [];
+   cardsPlayedInRound = [];
+   cardsAllowedToPlay = [];
+   playersInRound = [];
+
+   // Fetch and show new data from players
+   displayPlayers();
+
+   // Reset points
+   for(let i = 0; i<players.length; i++){
+      points[i].innerHTML = 0 + " points";
+   }
+
 });
 
 // Receive round results
 socket.on("roundResults", (data) => {
    let message = `${CircularJSON.parse(data.winner)._name} won the round with ${CircularJSON.parse(data.cardWon).name}`;
 
+   console.log(winner);
+
+   // Display winner
+   let index = -1;
+   for(let i = 0; i<players.length; i++){
+      if(players[i]._name === CircularJSON.parse(data.winner)._name){
+         index = i;
+      }
+   }
+   console.log(index);
+   winner[index].classList.remove("hidden");
+
    addToPane(message);
    setTimeout(() => {
-      // Clear cards played in rounds
+      // Clear cards played in rounds and players in round
       cardsPlayedInRound = [];
-      displayCardsPlayInRound(cardsPlayedInRound);
+      playersInRound = [];
+      displayCardsPlayInRound();
+
+      // Undisplay winner
+      winner[index].classList.add("hidden");
    }, 5000);
+
+
 });
 
 // Hochzeit
@@ -127,6 +159,7 @@ socket.on("hochzeit", (data) => {
    console.log(data.message);
 
    addToPane(data.message);
+   setTimeout(() => {}, 4000);
 });
 
 
@@ -134,10 +167,13 @@ socket.on("hochzeit", (data) => {
 socket.on("playCard", (data) => {
    // Add to cards played in round list
    let card = CircularJSON.parse(data.card);
+   let player = CircularJSON.parse(data.player);
+
    cardsPlayedInRound.push(card);
+   playersInRound.push(player);
 
    // Display cards to the screen
-   displayCardsPlayInRound(cardsPlayedInRound);
+   displayCardsPlayInRound();
 
    // Display who played the card
 });
@@ -146,9 +182,11 @@ socket.on("playCard", (data) => {
 socket.on("cardsOnHand", (data) => {
    cardsOnHand = CircularJSON.parse(data.cardsOnHand)._cards;
 
+   console.log(cardsOnHand);
+
 
    // DATA BINDING display cards allowed to play
-   displayCardsAllowedToPlay(cardsOnHand);
+   displayCardsOnHand(cardsOnHand);
 });
 
 // Receive cards allowed to play
@@ -171,7 +209,7 @@ socket.on("roundNumber", (data) => {
 socket.on("gameOver", (data) => {
    console.log(data.message);
 
-   addToPane(data.message);
+   // addToPane(data.message);
 
    btnNeuesSpiel.disabled = false;
 });
@@ -185,16 +223,24 @@ socket.on("cardsWon", (data) => {
 
 // Receive Points Won
 socket.on("pointsWon", (data) => {
-   console.log(data.message);
+   let pointsWon = CircularJSON.parse(data.points);
+   let player = CircularJSON.parse(data.player);
 
-   //addToPane(data.message);
+
+   for(let i = 0; i<points.length; i++){
+      if(players[i]._name === player._name){
+         points[i].innerHTML = pointsWon + " points";
+      }
+   }
+
 });
 
 // Receive which team wins
 socket.on("whichTeamWins", (data) => {
    console.log(data.message);
 
-   addToPane(data.message);
+   setTimeout(() => addToPane(data.message), 4000);
+
 });
 
 
@@ -208,6 +254,7 @@ function register() {
    socket.emit("register", {userName: name.value});
    name.disabled = true;
 
+
 }
 
 function playACard(index) {
@@ -220,24 +267,15 @@ function playACard(index) {
    // Refresh all cards allowed to play
    displayCardsAllowedToPlay(cardsAllowedToPlay);
 
-   // Refresh marker of player
-   let playerIndex = -1;
-
-   for(let i = 0; i <players.length; i++){
-      if(player._name === players[i]._name){
-         playerIndex = i;
-      }
-   }
-
-   playersIcon[playerIndex].classList.add("hidden");
-
+   // Remove click event listener
+   removeClickEvent();
 }
 
 function addToPane(message) {
    pane.innerHTML = message;
 }
 
-function appendToPane(message){
+function appendToPane(message) {
    pane.innerHTML += message;
 }
 
@@ -245,60 +283,93 @@ function addToUserPane(message) {
    userPane.innerHTML = message;
 }
 
-function hideUserYourTurn() {
-   userYourTurn.classList.remove("hidden");
+function removeClickEvent(){
+   // let cardsAllowed = document.getElementsByClassName("cardsAllowed");
+   //
+   // // REMOVE EVENT LISTENER
+   // for (let i = 0; i < cardsAllowed.length; i++) {
+   //    cardsAllowed[i].style.pointerEvents = "none";
+   // }
 }
 
-function showUserYourTurn() {
-   userYourTurn.classList.add("hidden");
+function displayCardsOnHand(cards) {
+   let template = `<ul>`;
+
+   for (let card of cards) {
+      template += `<li class="cardsAllowed"><img src="/images/png/${card._strength}.png" alt=""></li>`;
+   }
+   template += `</ul>`;
+   myCards.innerHTML = template;
 }
 
 function displayCardsAllowedToPlay(cards) {
-   myCards.innerHTML = `<ul>`;
+   let template = `<ul>`;
 
    for (let card of cards) {
-      myCards.innerHTML += `<li class="cardsAllowed"><img src="/images/png/${card._strength}.png" alt=""></li>`;
+      template += `<li class="cardsAllowed"><img src="/images/png/${card._strength}.png" alt=""></li>`;
    }
-   myCards.innerHTML += `</ul>`;
+   template += `</ul>`;
+   myCards.innerHTML = template;
+   console.log(myCards);
+
+   console.log(cardsAllowedToPlay);
 
    let cardsAllowed = document.getElementsByClassName("cardsAllowed");
 
    // ADD EVENT LISTENER
    for (let i = 0; i < cardsAllowed.length; i++) {
-      cardsAllowed[i].addEventListener("click", () => {
-         playACard(i);
-      });
+      cardsAllowed[i].addEventListener("click", () => playACard(i));
    }
 }
 
-function displayCardsPlayInRound(cards){
+function displayCardsPlayInRound() {
    cardsInRound.innerHTML = `<ul>`;
 
-   for (let card of cards) {
-      cardsInRound.innerHTML += `<li><img src="/images/png/${card._strength}.png" alt=""></li>`;
+   for (let i = 0; i < cardsPlayedInRound.length; i++) {
+      cardsInRound.innerHTML += `
+              <li>
+                 <img src="/images/png/${cardsPlayedInRound[i]._strength}.png" alt="">
+                 <div class="cardMember">${playersInRound[i]._name.toUpperCase()}</div>
+              </li>`;
    }
 
    cardsInRound.innerHTML += `</ul>`;
 }
 
-function displayPlayers(players){
-   // DATA BINDING display all players at top
+function displayPlayers() {
+   // DATA BINDING display all players at top and aside
    for (let i = 0; i < players.length; i++) {
       // Display player accordingly at top
       playerTitles[i].innerHTML = players[i]._name.toUpperCase();
+      titleAside[i].innerHTML = players[i]._name.toUpperCase();
+
+      fetchWonAverage(players[i]._name).then(data => wonAverage[i].innerHTML = `win ${data}%`);
    }
 }
 
-function newGame(){
+function newGame() {
    // Send event new game to server
    socket.emit("newGame", {data: ""});
    btnNeuesSpiel.disabled = true;
 }
 
-async function fetchGamesPlayed(){
+async function fetchWonAverage(playerName) {
    let response = await fetch("http://localhost:4000/game");
    let data = await response.json();
-   return data;
+
+   let gamesPlayed = await data.filter(game => game.player._name === playerName);
+
+   let winCounter = 0;
+   gamesPlayed.forEach(game => {
+      if (game.wonOrNot !== 0) {
+         winCounter++;
+      }
+   });
+   let percent = winCounter / gamesPlayed.length * 100;
+   percent.toFixed(2);
+
+   return percent.toFixed(2);
 }
 
-fetchGamesPlayed().then(data => console.log(data));
+
+

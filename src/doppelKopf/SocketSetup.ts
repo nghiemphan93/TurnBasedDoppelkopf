@@ -38,9 +38,9 @@ export class SocketSetup {
          // listen when played a card
          clientSocket.on("playCard", async (data: any) => {
             let playerIndex: number = this.gameController.playersSetupFactory.playerSocketIDList.indexOf(clientSocket.id);
-            let card: Card = this.gameController.playersSetupFactory.players[playerIndex].cardsOnHand.cards[data.message];
+            let card: Card = this.gameController.playersSetupFactory.players[playerIndex].cardsAllowedToPlay.cards[data.message];
             this.gameController.playersSetupFactory.players[playerIndex].cardsOnHand.remove(card);
-            console.log(card.toString());
+            console.log("card sent to server " + card.toString());
 
             // Save the card to Database for the player
             const connection = await DatabaseProvider.setupConnection();
@@ -51,7 +51,7 @@ export class SocketSetup {
             if (playerFromDatabase && cardFromDatabase) {
                let cardPlayed = new CardsPlayed(playerFromDatabase, cardFromDatabase);
                await connection.getRepository(CardsPlayed).save(cardPlayed);
-               console.log(player.toString() + " played " + cardPlayed.toString());
+               console.log(player.toString() + " played " + cardFromDatabase.toString() + " from database");
             }
 
 
@@ -109,7 +109,7 @@ export class SocketSetup {
 
       // Send back a message to the client to confirm registered
       clientSocket.emit("registerSuccess", {
-         player
+         player: CircularJSON.stringify(playerFromDatabase)
       });
 
       // Send back a message to all clients to display players
@@ -137,6 +137,7 @@ export class SocketSetup {
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
          let nextPlayer = this.gameController.playersSetupFactory.players[0];
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
+         this.io.sockets.emit("notifyNextTurn", {player: CircularJSON.stringify(nextPlayer)});
 
          console.log(this.gameController.playersSetupFactory.players.toString());
          console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
@@ -192,6 +193,7 @@ export class SocketSetup {
          this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[index + 1].cardsAllowedToPlay)});
          let nextPlayer = this.gameController.playersSetupFactory.players[index+1];
          this.io.to(nextPlayerID).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
+         this.io.sockets.emit("notifyNextTurn", {player: CircularJSON.stringify(nextPlayer)});
       } else {
          // End of the round
          console.log("Round ended");
@@ -218,6 +220,14 @@ export class SocketSetup {
          });
          console.log(roundWinner + " won the round with " + cardsPerRound[0]);
 
+         // Send points won to client
+         for (let player of this.gameController.playersSetupFactory.players) {
+             this.io.sockets.emit("pointsWon", {
+                player: CircularJSON.stringify(player),
+                points: CircularJSON.stringify(player.calcPointsWonPerGame())
+             });
+         }
+
 
          // clear the CardsPlayedPerRound
          this.gameController.cardsSetupFactory.cardsPlayedPerRound.clear();
@@ -232,9 +242,11 @@ export class SocketSetup {
             if (dreamPartner != null) {
                // Send Hochzeit to all players
                this.io.sockets.emit("hochzeit", {message: `Hochzeit: ${dreamPartner.toString()} plays with ${this.gameController.whoHasTwoKreuzQueen}`});
+               setTimeout(() => {}, 4000);
             } else {
                // Send Hochzeit to all players
                this.io.sockets.emit("hochzeit", {message: `Hochzeit: ${this.gameController.whoHasTwoKreuzQueen} plays alone `});
+               setTimeout(() => {}, 4000);
             }
          }
 
@@ -250,15 +262,15 @@ export class SocketSetup {
                cardsWon += player.toString() + " collected: " + player.cardsWon.toString() + "\n";
                pointsWon += player.toString() + " achieved: " + player.calcPointsWonPerGame() + " points\n";
             }
-            this.io.sockets.emit("cardsWon", {message: `${cardsWon}`});
-            this.io.sockets.emit("pointsWon", {message: `${pointsWon}`});
+            // this.io.sockets.emit("cardsWon", {message: `${cardsWon}`});
+            // this.io.sockets.emit("pointsWon", {message: `${pointsWon}`});
 
             // Sum up all points, which team wins
             this.gameController.sumUpPointTwoTeams();
 
             let whichTeamWins: string = "";
-            whichTeamWins += `${this.gameController.teamKreuzQueen.toString()} achieved ${this.gameController.pointTeamKreuzQueen} points \n`;
-            whichTeamWins += `${this.gameController.teamNoKreuzQueen.toString()} achieved ${this.gameController.pointTeamNoKreuzQueen} points \n`;
+            whichTeamWins += `${this.gameController.teamKreuzQueen.toString()} from team KREUZ QUEEN achieved ${this.gameController.pointTeamKreuzQueen} points \n`;
+            whichTeamWins += `${this.gameController.teamNoKreuzQueen.toString()} from team NO KREUZ QUEEN achieved ${this.gameController.pointTeamNoKreuzQueen} points \n`;
             if (this.gameController.whichTeamWon() > 0) {
                whichTeamWins += `Team Kreuz Queen wins`;
             } else {
@@ -339,6 +351,7 @@ export class SocketSetup {
                this.io.to(nextPlayerID).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
                let nexPlayer = this.gameController.playersSetupFactory.players[0];
                this.io.to(nextPlayerID).emit("yourTurn", {player: CircularJSON.stringify(nexPlayer)});
+               this.io.sockets.emit("notifyNextTurn", {player: CircularJSON.stringify(nexPlayer)});
             }, 5000);
 
 
@@ -356,9 +369,11 @@ export class SocketSetup {
       if (dreamPartner != null) {
          // Notify all players who plays with whom
          this.io.sockets.emit("hochzeit", {message: `${dreamPartner} plays with ${this.gameController.whoHasTwoKreuzQueen}`});
+         setTimeout(() => {}, 4000);
       } else {
          // Notify all players who plays with whom
          this.io.sockets.emit("hochzeit", {message: `${this.gameController.whoHasTwoKreuzQueen} plays alone`});
+         setTimeout(() => {}, 4000);
       }
    }
 
@@ -408,10 +423,14 @@ export class SocketSetup {
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("cardsAllowedToPlay", {cardsAllowedToPlay: CircularJSON.stringify(this.gameController.playersSetupFactory.players[0].cardsAllowedToPlay)});
          let nextPlayer = this.gameController.playersSetupFactory.players[0];
          this.io.to(this.gameController.playersSetupFactory.playerSocketIDList[0]).emit("yourTurn", {player: CircularJSON.stringify(nextPlayer)});
+         this.io.sockets.emit("notifyNextTurn", {player: CircularJSON.stringify(nextPlayer)});
 
          console.log(this.gameController.playersSetupFactory.players.toString());
          console.log("Team Kreuz Queen: " + this.gameController.teamKreuzQueen.toString());
          console.log("Team No Kreuz Queen: " + this.gameController.teamNoKreuzQueen.toString());
+
+         // Clear new game list
+         this.newGameList = [];
       }
    }
 
