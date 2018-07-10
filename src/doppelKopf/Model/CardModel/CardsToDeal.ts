@@ -17,6 +17,7 @@ import {Rank} from "./Rank";
 import {Card} from "./Card";
 import {CardsOnHand} from "./CardsOnHand";
 import {DatabaseProvider} from "../../../DatabaseProvider";
+import {CardsWon} from "./CardsWon";
 
 export class CardsToDeal extends Cards{
 
@@ -56,6 +57,12 @@ export class CardsToDeal extends Cards{
    public deal(): void{
       // Prepare a Hand for every player
       let cardsToDeal: CardsOnHand = new CardsOnHand();
+
+      // Clear the hand and cards won if existed
+      for(let player of this.players){
+         player.cardsOnHand = new CardsOnHand();
+         player.cardsWon = new CardsWon();
+      }
 
       // For each player: remove 10 Cards from Deck then transfer to each Hand
       for(let player of this.players){

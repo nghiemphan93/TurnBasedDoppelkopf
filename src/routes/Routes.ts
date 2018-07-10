@@ -1,3 +1,4 @@
+import * as CircularJSON from "circular-json";
 import {Connection, FieldInfo, MysqlError, Pool} from "mysql";
 import express, {Request, Response} from "express";
 import mysql from "mysql";
@@ -12,6 +13,8 @@ import {PlayersSetupFactory} from "../doppelKopf/Controller/PlayersSetupFactory"
 import {SocketSetup} from "../doppelKopf/SocketSetup";
 import {GameController} from "../doppelKopf/Controller/GameController";
 import {Game} from "../doppelKopf/Model/GameModel/Game";
+import {GamesPlayed} from "../doppelKopf/Model/GameModel/GamesPlayed";
+import {createQueryBuilder} from "typeorm";
 
 class Routes {
    public router = express.Router();
@@ -53,23 +56,16 @@ class Routes {
          res.send(cardsToDeal.cards.toString());
       });
 
-      // tes game
+      // API AJAX
       this.router.get("/game", async (req: Request, res: Response) => {
-         let phan: Player = new Player("phan", "");
-         let melanie: Player = new Player("mel", "");
-         let sebastian: Player = new Player("sebas", "");
-         let dominik: Player = new Player("dom", "");
-         let list = [phan, melanie, sebastian, dominik];
-
-
          const connection = await DatabaseProvider.setupConnection();
 
-         let listFromDatabase = await connection.getRepository(Player).find(list);
-         let game: Game = new Game(listFromDatabase[0], listFromDatabase[1], listFromDatabase[2], listFromDatabase[3]);
-         await connection.getRepository(Game).save(game);
+         let gamesPlayed = await connection.getRepository(GamesPlayed).find({
+            relations : ["player", "partnerInGame", "game"],
+            where: {playerId: 1}
+         });
 
-
-         res.send([game, list, listFromDatabase]);
+         res.send(CircularJSON.stringify(gamesPlayed));
       });
    }  // end of setUpUserRoutes
 }

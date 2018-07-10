@@ -106,9 +106,9 @@ export class GameController extends Doppelkopf{
       this.game_ID = 0;
       this.cardsSetupFactory.initCardSetup();
 
-      for(let player of this.playersSetupFactory.players){
-         console.log(player.cardsOnHand.toString());
-      }
+      // for(let player of this.playersSetupFactory.players){
+      //    console.log(player.cardsOnHand.toString());
+      // }
 
 
       //  prepare which players are allowed to guess for Bazinga
@@ -123,9 +123,9 @@ export class GameController extends Doppelkopf{
       this.whoHasTwoKreuzQueen = this.calWhoHasTwoKreuzQueen();
 
       // Start the game
-      setInterval(() => {
-         this.startGame();
-      }, 1000/60);
+      // setInterval(() => {
+      //    this.startGame();
+      // }, 1000/60);
    }
 
    /**
@@ -133,7 +133,7 @@ export class GameController extends Doppelkopf{
     */
    public preparePlayers(): void{
       this.socketSetup = new SocketSetup(this.io, this);
-      this.playersSetupFactory = new PlayersSetupFactory(this.socketSetup, this);
+      this.playersSetupFactory = new PlayersSetupFactory(this.socketSetup);
       this.playersSetupFactory.init();
    }
 
